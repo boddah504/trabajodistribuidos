@@ -306,160 +306,105 @@ function dibujarRuta(ruta, color, ancho, punteada, label) {
 }
 
 // ============================================================
-// ALGORITMOS (en JavaScript)
-// ============================================================
-function distancia(i, j) {
-    var a = clientes[i], b = clientes[j];
-    var R = 6371;  // Radio tierra km
-    var dLat = (b.lat - a.lat) * Math.PI / 180;
-    var dLng = (b.lng - a.lng) * Math.PI / 180;
-    var s = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180) * Math.cos(b.lat*Math.PI/180) * Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
-}
-
-function voraz() {
-    var n = clientes.length;
-    var visitados = new Array(n).fill(false);
-    var ruta = [0];
-    visitados[0] = true;
-    var total = 0;
-    var actual = 0;
-    for (var paso = 0; paso < n - 1; paso++) {
-        var mejor = -1;
-        var mejorDist = Infinity;
-        for (var i = 0; i < n; i++) {
-            if (!visitados[i]) {
-                var d = distancia(actual, i);
-                if (d < mejorDist) {
-                    mejorDist = d;
-                    mejor = i;
-                }
-            }
-        }
-        ruta.push(mejor);
-        total += mejorDist;
-        visitados[mejor] = true;
-        actual = mejor;
-    }
-    total += distancia(actual, 0);
-    return { ruta: ruta, distancia: total.toFixed(2) };
-}
-
-function backtracking() {
-    var n = clientes.length;
-    var mat = [];
-    for (var i = 0; i < n; i++) {
-        mat[i] = [];
-        for (var j = 0; j < n; j++) {
-            mat[i][j] = distancia(i, j);
-        }
-    }
-
-    var mejorDist = Infinity;
-    var mejorRuta = null;
-    var ramasExp = 0;
-
-    function bt(actual, visitados, distAct, ruta) {
-        if (distAct >= mejorDist) return;  // PODA
-        if (ruta.length === n) {
-            var distTotal = distAct + mat[actual][0];
-            ramasExp++;
-            if (distTotal < mejorDist) {
-                mejorDist = distTotal;
-                mejorRuta = ruta.slice();
-            }
-            return;
-        }
-        for (var i = 0; i < n; i++) {
-            if (!visitados[i]) {
-                visitados[i] = true;
-                ruta.push(i);
-                bt(i, visitados, distAct + mat[actual][i], ruta);
-                ruta.pop();
-                visitados[i] = false;
-            }
-        }
-    }
-
-    var vis = new Array(n).fill(false);
-    vis[0] = true;
-    bt(0, vis, 0, [0]);
-
-    var totalPosible = 1;
-    for (var f = 2; f < n; f++) totalPosible *= f;
-
-    return {
-        ruta: mejorRuta || [],
-        distancia: mejorDist === Infinity ? 0 : mejorDist.toFixed(2),
-        ramas: ramasExp,
-        total: totalPosible,
-        ahorro: ((1 - ramasExp / totalPosible) * 100).toFixed(1)
-    };
-}
-
-// ============================================================
-// EJECUTAR ALGORITMOS
+// CONEXION CON PYTHON (API)
 // ============================================================
 var resultadoV = null;
 var resultadoB = null;
+var ejecutando = false;
 
-function ejecutarVoraz() {
-    if (clientes.length < 2) { alert('Agrega al menos 2 puntos'); return; }
-    limpiarRutas();
-    resultadoV = voraz();
-    dibujarRuta(resultadoV.ruta, '#f97316', 4, null, 'Voraz: ' + resultadoV.distancia + ' km');
-    mostrarResultados();
-    document.getElementById('btnComparar').style.display = 'none';
+function llamarAPI(algoritmo) {
+    if (clientes.length < 2) { alert('Agrega al menos 2 puntos en el mapa'); return; }
+
+    var datos = {
+        clientes: clientes.map(function(c) { return [c.lat, c.lng]; })
+    };
+
+    ejecutando = true;
+    document.getElementById('btnVoraz').disabled = true;
+    document.getElementById('btnBT').disabled = true;
+    document.getElementById('resultados').innerHTML = '<div style="color:#94a3b8;text-align:center;">Ejecutando en Python...</div>';
+
+    fetch('/api/ejecutar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        limpiarRutas();
+
+        if (algoritmo === 'voraz' || algoritmo === 'ambas') {
+            resultadoV = data.voraz;
+            dibujarRuta(resultadoV.ruta, '#f97316', 4, null,
+                'Voraz: ' + resultadoV.distancia + ' km');
+        }
+
+        if (algoritmo === 'bt' || algoritmo === 'ambas') {
+            resultadoB = data.backtracking;
+            if (resultadoB) {
+                dibujarRuta(resultadoB.ruta, '#10b981', 4, null,
+                    'Backtracking: ' + resultadoB.distancia + ' km');
+            }
+        }
+
+        if (algoritmo === 'ambas' && resultadoV && resultadoB) {
+            limpiarRutas();
+            dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4',
+                'Voraz: ' + resultadoV.distancia + ' km');
+            dibujarRuta(resultadoB.ruta, '#10b981', 3, null,
+                'Backtracking: ' + resultadoB.distancia + ' km');
+        }
+
+        mostrarResultados(data, algoritmo);
+        ejecutando = false;
+        document.getElementById('btnVoraz').disabled = false;
+        document.getElementById('btnBT').disabled = clientes.length < 2;
+        if (resultadoV && resultadoB && algoritmo !== 'ambas') {
+            document.getElementById('btnComparar').style.display = 'inline-block';
+        }
+    })
+    .catch(function(err) {
+        console.error(err);
+        document.getElementById('resultados').innerHTML =
+            '<div style="color:#ef4444;text-align:center;">Error: No conecta con Python.<br>Asegurate de ejecutar: <b>python servidor.py</b></div>';
+        ejecutando = false;
+        document.getElementById('btnVoraz').disabled = false;
+        document.getElementById('btnBT').disabled = clientes.length < 2;
+    });
 }
 
-function ejecutarBT() {
-    if (clientes.length < 2) { alert('Agrega al menos 2 puntos'); return; }
-    if (clientes.length > 10) {
-        if (!confirm(clientes.length + ' clientes puede ser lento. Continuar?')) return;
-    }
-    limpiarRutas();
-    resultadoB = backtracking();
-    dibujarRuta(resultadoB.ruta, '#10b981', 4, null, 'Backtracking: ' + resultadoB.distancia + ' km');
-    mostrarResultados();
+function ejecutarVoraz() { llamarAPI('voraz'); }
+function ejecutarBT() { llamarAPI('bt'); }
+function mostrarComparativa() { llamarAPI('ambas'); }
 
-    if (resultadoV) {
-        document.getElementById('btnComparar').style.display = 'inline-block';
-    }
-}
-
-function mostrarComparativa() {
-    if (!resultadoV || !resultadoB) return;
-    limpiarRutas();
-    dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4', 'Voraz: ' + resultadoV.distancia + ' km');
-    dibujarRuta(resultadoB.ruta, '#10b981', 3, null, 'Backtracking: ' + resultadoB.distancia + ' km');
-    mostrarResultados(true);
-}
-
-function mostrarResultados(comparando) {
+function mostrarResultados(data, modo) {
     var div = document.getElementById('resultados');
     var html = '';
+    var v = data.voraz;
+    var bt = data.backtracking;
 
-    if (resultadoV) {
-        html += '<div class="fila"><span>Voraz</span><span class="val val-naranja">' + resultadoV.distancia + ' km</span></div>';
+    if (v) {
+        html += '<div class="fila"><span>Voraz</span><span class="val val-naranja">' + v.distancia + ' km</span></div>';
     }
-    if (resultadoB) {
-        var ahorro = ((1 - resultadoB.ramas / resultadoB.total) * 100).toFixed(1);
-        html += '<div class="fila"><span>Backtracking</span><span class="val val-verde">' + resultadoB.distancia + ' km</span></div>';
-        if (resultadoV) {
-            var mejora = ((parseFloat(resultadoV.distancia) - parseFloat(resultadoB.distancia)) / parseFloat(resultadoV.distancia) * 100).toFixed(1);
-            html += '<div class="fila" style="border:none;padding-top:6px;"><span>Mejora</span><span class="val val-verde">' + mejora + '%</span></div>';
+    if (bt) {
+        html += '<div class="fila"><span>Backtracking</span><span class="val val-verde">' + bt.distancia + ' km</span></div>';
+        if (v && data.mejora) {
+            html += '<div class="fila" style="border:none;padding-top:6px;"><span>Mejora</span><span class="val val-verde">' + data.mejora + '%</span></div>';
         }
-        html += '<div class="fila" style="font-size:0.75rem;color:#94a3b8;border:none;">Ramas: ' + resultadoB.ramas + ' de ' + resultadoB.total + '</div>';
-        html += '<div class="poda-bar"><div style="width:' + (100 - parseFloat(ahorro)) + '%"></div></div>';
-        html += '<div style="font-size:0.75rem;color:#10b981;font-weight:bold;">Poda ahorr&oacute; ' + ahorro + '%</div>';
+        html += '<div class="fila" style="font-size:0.75rem;color:#94a3b8;border:none;">Ramas: ' + bt.ramas + ' de ' + bt.total + '</div>';
+        html += '<div class="poda-bar"><div style="width:' + bt.ramas / bt.total * 100 + '%"></div></div>';
+        html += '<div style="font-size:0.75rem;color:#10b981;font-weight:bold;">Poda ahorr&oacute; ' + bt.ahorro + '%</div>';
     }
 
-    if (!resultadoV && !resultadoB) {
+    if (!html) {
         html = '<div style="color:#94a3b8;text-align:center;">Ejecuta un algoritmo primero</div>';
     }
 
     div.innerHTML = html;
 }
+
+// Deshabilitar comparar al cargar
+document.getElementById('btnComparar').style.display = 'none';
 </script>
 </body>
 </html>
