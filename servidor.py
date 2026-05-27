@@ -53,10 +53,26 @@ def distancia_terrestre(coord1, coord2):
         _cache_distancias[key] = dist_km
         return dist_km
     except:
-        # Fallback: distancia aerea * 1.4 (factor carretera)
         d = _distancia_aerea(coord1, coord2) * 1.4
         _cache_distancias[key] = d
         return d
+
+
+def geometria_ruta_osrm(clientes, orden):
+    """Obtiene la polilinea de calles reales desde OSRM para una secuencia ordenada de puntos"""
+    if len(orden) < 2:
+        return []
+    # Cerrar el ciclo: A → B → ... → A
+    coords = ";".join([f"{clientes[i][1]},{clientes[i][0]}" for i in orden + [orden[0]]])
+    url = f"https://router.project-osrm.org/route/v1/driving/{coords}?overview=full&geometries=geojson&steps=false"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "OPTIRUTA+"})
+        resp = urllib.request.urlopen(req, timeout=8)
+        data = json.loads(resp.read())
+        pts = data["routes"][0]["geometry"]["coordinates"]
+        return [[p[1], p[0]] for p in pts]  # [lat, lng] para Leaflet
+    except:
+        return []  # fallback a linea recta en el frontend
 
 def _distancia_aerea(coord1, coord2):
     R = 6371
@@ -209,7 +225,10 @@ class Servidor(BaseHTTPRequestHandler):
 
             # Voraz
             ruta_v, dist_v = voraz(clientes)
-            resultado["voraz"] = {"ruta": ruta_v, "distancia": dist_v}
+            resultado["voraz"] = {
+                "ruta": ruta_v, "distancia": dist_v,
+                "geometria": geometria_ruta_osrm(clientes, ruta_v)
+            }
 
             # Backtracking (max 10)
             if len(clientes) <= 10:
@@ -218,7 +237,8 @@ class Servidor(BaseHTTPRequestHandler):
                 ahorro = round((1 - ramas / total) * 100, 1)
                 resultado["backtracking"] = {
                     "ruta": ruta_bt, "distancia": dist_bt,
-                    "ramas": ramas, "total": total, "ahorro": ahorro
+                    "ramas": ramas, "total": total, "ahorro": ahorro,
+                    "geometria": geometria_ruta_osrm(clientes, ruta_bt)
                 }
                 if dist_v:
                     resultado["mejora"] = mejora

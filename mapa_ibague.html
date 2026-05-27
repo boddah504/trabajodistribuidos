@@ -195,10 +195,16 @@ function limpiarTodo() {
 
 function limpiarRutas() { lineas.forEach(function(l) { mapa.removeLayer(l); }); lineas = []; }
 
-function dibujarRuta(ruta, color, ancho, punteada, label) {
-    if (!ruta || ruta.length < 2) return;
-    var puntos = ruta.map(function(i) { return [clientes[i].lat, clientes[i].lng]; });
-    puntos.push(puntos[0]);
+function dibujarRuta(ruta, color, ancho, punteada, label, geometria) {
+    var puntos;
+    if (geometria && geometria.length > 1) {
+        puntos = geometria;
+    } else if (ruta && ruta.length >= 2) {
+        puntos = ruta.map(function(i) { return [clientes[i].lat, clientes[i].lng]; });
+        puntos.push(puntos[0]);
+    } else {
+        return;
+    }
     var poly = L.polyline(puntos, { color: color, weight: ancho || 3, opacity: 0.8,
         dashArray: punteada || null }).addTo(mapa);
     lineas.push(poly);
@@ -238,13 +244,13 @@ function llamarAPI(algo) {
         resultadoB = data.backtracking;
 
         if (algo === 'voraz' || algo === 'ambas')
-            dibujarRuta(resultadoV.ruta, '#f97316', 4, null, 'Voraz: ' + resultadoV.distancia + ' km');
+            dibujarRuta(resultadoV.ruta, '#f97316', 4, null, 'Voraz: ' + resultadoV.distancia + ' km', resultadoV.geometria);
         if (algo === 'bt' || algo === 'ambas')
-            dibujarRuta(resultadoB.ruta, '#10b981', 4, null, 'Backtracking: ' + resultadoB.distancia + ' km');
+            dibujarRuta(resultadoB.ruta, '#10b981', 4, null, 'Backtracking: ' + resultadoB.distancia + ' km', resultadoB.geometria);
         if (algo === 'ambas' && resultadoV && resultadoB) {
             limpiarRutas();
-            dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4', 'Voraz: ' + resultadoV.distancia + ' km');
-            dibujarRuta(resultadoB.ruta, '#10b981', 3, null, 'Backtracking: ' + resultadoB.distancia + ' km');
+            dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4', 'Voraz: ' + resultadoV.distancia + ' km', resultadoV.geometria);
+            dibujarRuta(resultadoB.ruta, '#10b981', 3, null, 'Backtracking: ' + resultadoB.distancia + ' km', resultadoB.geometria);
         }
 
         mostrarResultados(data, algo);
