@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OPTIRUTA+ - Mapa Ibagué</title>
+<title>OPTIRUTA+ - Mapa Ibagué (Terrestre)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,58 +12,38 @@ body {
     background: #0f172a;
     color: #f1f5f9;
     min-height: 100vh;
-    padding: 20px;
+    padding: 15px;
 }
 h1 {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     background: linear-gradient(135deg, #c084fc, #60a5fa);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
-.sub {
-    text-align: center;
-    color: #a5b4fc;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-}
+.sub { text-align: center; color: #a5b4fc; font-size: 0.85rem; margin-bottom: 12px; }
 .contenedor {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 15px;
+    grid-template-columns: 1fr 320px;
+    gap: 12px;
 }
-#mapa {
-    height: 600px;
-    border-radius: 16px;
-    border: 2px solid #334155;
-    z-index: 1;
-}
+#mapa { height: 560px; border-radius: 14px; border: 2px solid #334155; z-index: 1; }
 .panel {
-    background: #1e293b;
-    border-radius: 16px;
-    padding: 15px;
-    border: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    background: #1e293b; border-radius: 14px; padding: 12px;
+    border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px;
 }
-.panel h3 {
-    color: #fcd34d;
-    font-size: 1rem;
+.panel h3 { color: #fcd34d; font-size: 0.95rem; }
+select {
+    background: #0f172a; color: #f1f5f9; border: 1px solid #334155;
+    border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; width: 100%;
 }
 .btn {
-    padding: 10px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 0.9rem;
-    color: white;
+    padding: 8px; border: none; border-radius: 10px; font-weight: 600;
+    cursor: pointer; transition: 0.2s; font-size: 0.85rem; color: white;
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-voraz { background: #f97316; }
@@ -72,170 +52,115 @@ h1 {
 .btn-info { background: #3b82f6; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 .lista-clientes {
-    flex: 1;
-    overflow-y: auto;
-    max-height: 200px;
-    font-size: 0.85rem;
+    flex: 1; overflow-y: auto; max-height: 140px; font-size: 0.8rem;
 }
 .cliente-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 8px;
-    background: #0f172a;
-    border-radius: 8px;
-    margin-bottom: 4px;
-    border-left: 3px solid #3b82f6;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 7px; background: #0f172a; border-radius: 6px;
+    margin-bottom: 3px; border-left: 3px solid #3b82f6;
 }
 .cliente-item .nom { font-weight: 600; color: #7dd3fc; }
-.cliente-item .coord { color: #94a3b8; font-size: 0.75rem; }
-.cliente-item .del { cursor: pointer; color: #ef4444; font-weight: bold; font-size: 1.1rem; }
+.cliente-item .coord { color: #94a3b8; font-size: 0.7rem; }
+.cliente-item .del { cursor: pointer; color: #ef4444; font-weight: bold; font-size: 1rem; }
 .resultados {
-    background: #0f172a;
-    border-radius: 12px;
-    padding: 10px;
-    font-size: 0.85rem;
+    background: #0f172a; border-radius: 10px; padding: 8px; font-size: 0.8rem; max-height: 300px; overflow-y: auto;
 }
-.resultados .fila {
-    display: flex;
-    justify-content: space-between;
-    padding: 3px 0;
-    border-bottom: 1px solid #1e293b;
-}
+.resultados .fila { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid #1e293b; }
 .resultados .val { font-weight: bold; }
 .val-verde { color: #10b981; }
 .val-naranja { color: #f97316; }
-.poda-bar {
-    height: 6px;
-    background: #334155;
-    border-radius: 3px;
-    margin-top: 5px;
-    overflow: hidden;
+.poda-bar { height: 5px; background: #334155; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.poda-bar div { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 3px; }
+.instruccion { font-size: 0.7rem; color: #94a3b8; text-align: center; padding: 6px; background: #0f172a; border-radius: 6px; }
+.transporte-info { font-size: 0.75rem; color: #94a3b8; display: flex; gap: 8px; justify-content: center; }
+.transporte-info span { background: #0f172a; padding: 2px 8px; border-radius: 4px; }
+.mochila-grid { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.mochila-item {
+    background: #0f172a; padding: 3px 6px; border-radius: 4px;
+    font-size: 0.7rem; border: 1px solid #334155;
 }
-.poda-bar div {
-    height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #10b981);
-    border-radius: 3px;
-}
-.instruccion {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    text-align: center;
-    padding: 8px;
-    background: #0f172a;
-    border-radius: 8px;
-}
+.mochila-item.ok { border-color: #10b981; color: #10b981; }
 </style>
 </head>
 <body>
 <h1>OPTIRUTA+</h1>
-<div class="sub">Mapa interactivo de Ibagu&eacute; — Agrega puntos de entrega</div>
+<div class="sub">Mapa vial de Ibagu&eacute; &mdash; Agrega puntos y elige transporte</div>
 
 <div class="contenedor">
     <div id="mapa"></div>
     <div class="panel">
-        <h3>Puntos de Entrega</h3>
-        <div class="lista-clientes" id="listaClientes">
-            <div style="color:#94a3b8;text-align:center;">Haz clic en el mapa para agregar</div>
+        <h3>Transporte</h3>
+        <select id="transporte" onchange="cambiarTransporte()">
+            <option value="moto">Moto (50kg / 100cm)</option>
+            <option value="carro" selected>Carro (300kg / 300cm)</option>
+            <option value="camion">Camion (1000kg / 1000cm)</option>
+        </select>
+        <div class="transporte-info">
+            <span id="infoPeso">Peso: 300kg</span>
+            <span id="InfoLargo">Largo: 300cm</span>
         </div>
 
+        <h3>Puntos</h3>
+        <div class="lista-clientes" id="listaClientes">
+            <div style="color:#94a3b8;text-align:center;">Click en el mapa para agregar</div>
+        </div>
         <div class="instruccion">
-            Click en el mapa para agregar punto<br>
-            Arrastra los marcadores para moverlos
+            Click: agrega punto &bull; Arrastra: mueve &bull; X: elimina
         </div>
 
         <button class="btn btn-voraz" id="btnVoraz" onclick="ejecutarVoraz()">Ejecutar Voraz</button>
         <button class="btn btn-bt" id="btnBT" onclick="ejecutarBT()" disabled>Ejecutar Backtracking</button>
-        <button class="btn btn-info" id="btnComparar" onclick="mostrarComparativa()" style="display:none;">Ver Comparativa</button>
+        <button class="btn btn-info" id="btnComparar" onclick="mostrarComparativa()" style="display:none;">Comparar ambas</button>
         <button class="btn btn-danger" onclick="limpiarTodo()">Limpiar todo</button>
 
         <div class="resultados" id="resultados">
-            <div style="color:#94a3b8;text-align:center;">Resultados aparecerán aqu&iacute;</div>
+            <div style="color:#94a3b8;text-align:center;">Resultados aqu&iacute;</div>
         </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ============================================================
-// MAPA
-// ============================================================
 var mapa = L.map('mapa', { zoomControl: true }).setView([4.4389, -75.2322], 13);
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 18
+    attribution: '&copy; OpenStreetMap', maxZoom: 18
 }).addTo(mapa);
 
-// Icono personalizado para los marcadores
 var iconoDeposito = L.divIcon({
-    html: '<div style="background:#c084fc;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    className: ''
+    html: '<div style="background:#c084fc;width:22px;height:22px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
+    iconSize: [22,22], iconAnchor: [11,11], className: ''
 });
-
 var iconoCliente = L.divIcon({
     html: '<div style="background:#60a5fa;width:16px;height:16px;border-radius:50%;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>',
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-    className: ''
+    iconSize: [16,16], iconAnchor: [8,8], className: ''
 });
 
-var clientes = [];  // { id, nombre, lat, lng, marcador }
-var lineas = [];    // Polylines en el mapa
+var clientes = [];
+var lineas = [];
 var contador = 0;
 
-// ============================================================
-// AGREGAR CLIENTE
-// ============================================================
 mapa.on('click', function(e) {
-    var lat = e.latlng.lat.toFixed(6);
-    var lng = e.latlng.lng.toFixed(6);
-    agregarCliente(parseFloat(lat), parseFloat(lng));
+    agregarCliente(e.latlng.lat, e.latlng.lng);
 });
 
 function agregarCliente(lat, lng) {
     contador++;
-    var nombre = contador === 1 ? 'Depósito' : 'Cliente ' + (contador - 1);
-    var esDeposito = contador === 1;
-
-    var icono = esDeposito ? iconoDeposito : iconoCliente;
-
+    var nombre = contador === 1 ? 'Deposito' : 'Cliente ' + (contador - 1);
+    var icono = contador === 1 ? iconoDeposito : iconoCliente;
     var marcador = L.marker([lat, lng], { icon: icono, draggable: true }).addTo(mapa);
-
-    var tooltipText = esDeposito ? '<b>Depósito</b>' : '<b>' + nombre + '</b>';
-    marcador.bindTooltip(tooltipText, { direction: 'top', offset: [0, -10] });
-
-    // Al arrastrar, actualizar
+    marcador.bindTooltip(nombre, { direction: 'top', offset: [0, -12] });
     marcador.on('dragend', function() {
-        var pos = marcador.getLatLng();
+        var p = marcador.getLatLng();
         var c = clientes.find(function(x) { return x.marcador === marcador; });
-        if (c) {
-            c.lat = pos.lat;
-            c.lng = pos.lng;
-        }
-        actualizarLista();
-        limpiarRutas();
+        if (c) { c.lat = p.lat; c.lng = p.lng; }
+        actualizarLista(); limpiarRutas();
     });
-
-    clientes.push({ id: contador, nombre: nombre, lat: lat, lng: lng, marcador: marcador, esDeposito: esDeposito });
-    actualizarLista();
-    limpiarRutas();
-
-    if (contador >= 2) {
-        document.getElementById('btnBT').disabled = false;
-    }
-
-    // Centrar si es el primero
-    if (contador === 1) {
-        mapa.setView([lat, lng], 14);
-    }
+    clientes.push({ id: contador, nombre: nombre, lat: lat, lng: lng, marcador: marcador });
+    actualizarLista(); limpiarRutas();
+    document.getElementById('btnBT').disabled = clientes.length < 2;
+    if (contador === 1) mapa.setView([lat, lng], 14);
 }
 
-// ============================================================
-// LISTA DE CLIENTES
-// ============================================================
 function actualizarLista() {
     var div = document.getElementById('listaClientes');
     div.innerHTML = '';
@@ -244,130 +169,93 @@ function actualizarLista() {
         item.className = 'cliente-item';
         item.innerHTML = '<div><span class="nom">' + c.nombre + '</span><br><span class="coord">' +
             c.lat.toFixed(4) + ', ' + c.lng.toFixed(4) + '</span></div>' +
-            (c.esDeposito ? '' : '<span class="del" onclick="eliminarCliente(' + c.id + ')">&times;</span>');
+            (c.id > 1 ? '<span class="del" onclick="eliminarCliente(' + c.id + ')">&times;</span>' : '');
         div.appendChild(item);
     });
-    if (clientes.length === 0) {
-        div.innerHTML = '<div style="color:#94a3b8;text-align:center;">Haz clic en el mapa para agregar</div>';
-    }
+    if (!clientes.length) div.innerHTML = '<div style="color:#94a3b8;text-align:center;">Click en el mapa</div>';
 }
 
 function eliminarCliente(id) {
     var idx = clientes.findIndex(function(c) { return c.id === id; });
-    if (idx > 0) {  // No eliminar depósito
+    if (idx > 0) {
         mapa.removeLayer(clientes[idx].marcador);
         clientes.splice(idx, 1);
-        actualizarLista();
-        limpiarRutas();
-        if (clientes.length < 2) {
-            document.getElementById('btnBT').disabled = true;
-        }
+        actualizarLista(); limpiarRutas();
+        document.getElementById('btnBT').disabled = clientes.length < 2;
     }
 }
 
 function limpiarTodo() {
     clientes.forEach(function(c) { mapa.removeLayer(c.marcador); });
-    clientes = [];
-    contador = 0;
-    limpiarRutas();
-    actualizarLista();
+    clientes = []; contador = 0; limpiarRutas(); actualizarLista();
     document.getElementById('btnBT').disabled = true;
     document.getElementById('btnComparar').style.display = 'none';
-    document.getElementById('resultados').innerHTML = '<div style="color:#94a3b8;text-align:center;">Resultados aparecerán aqu&iacute;</div>';
+    document.getElementById('resultados').innerHTML = '<div style="color:#94a3b8;text-align:center;">Resultados aqui</div>';
 }
 
-// ============================================================
-// LIMPIAR RUTAS
-// ============================================================
-function limpiarRutas() {
-    lineas.forEach(function(l) { mapa.removeLayer(l); });
-    lineas = [];
-}
+function limpiarRutas() { lineas.forEach(function(l) { mapa.removeLayer(l); }); lineas = []; }
 
 function dibujarRuta(ruta, color, ancho, punteada, label) {
     if (!ruta || ruta.length < 2) return;
-    var puntos = ruta.map(function(idx) {
-        return [clientes[idx].lat, clientes[idx].lng];
-    });
-    // Cerrar ciclo
+    var puntos = ruta.map(function(i) { return [clientes[i].lat, clientes[i].lng]; });
     puntos.push(puntos[0]);
+    var poly = L.polyline(puntos, { color: color, weight: ancho || 3, opacity: 0.8,
+        dashArray: punteada || null }).addTo(mapa);
+    lineas.push(poly);
+    if (label) poly.bindTooltip(label, { direction: 'center', className: '' });
+}
 
-    var polyline = L.polyline(puntos, {
-        color: color,
-        weight: ancho || 3,
-        opacity: 0.8,
-        dashArray: punteada || null
-    }).addTo(mapa);
-    lineas.push(polyline);
-
-    if (label) {
-    polyline.bindTooltip(label, { permanent: false, direction: 'center', className: 'ruta-label' });
-    }
+function cambiarTransporte() {
+    var t = document.getElementById('transporte').value;
+    var datos = { moto: {p:50,l:100}, carro: {p:300,l:300}, camion: {p:1000,l:1000} };
+    document.getElementById('infoPeso').textContent = 'Peso: ' + datos[t].p + 'kg';
+    document.getElementById('InfoLargo').textContent = 'Largo: ' + datos[t].l + 'cm';
 }
 
 // ============================================================
-// CONEXION CON PYTHON (API)
+// API
 // ============================================================
-var resultadoV = null;
-var resultadoB = null;
-var ejecutando = false;
+var resultadoV = null, resultadoB = null;
 
-function llamarAPI(algoritmo) {
-    if (clientes.length < 2) { alert('Agrega al menos 2 puntos en el mapa'); return; }
-
-    var datos = {
-        clientes: clientes.map(function(c) { return [c.lat, c.lng]; })
-    };
-
-    ejecutando = true;
+function llamarAPI(algo) {
+    if (clientes.length < 2) { alert('Agrega al menos 2 puntos'); return; }
     document.getElementById('btnVoraz').disabled = true;
     document.getElementById('btnBT').disabled = true;
-    document.getElementById('resultados').innerHTML = '<div style="color:#94a3b8;text-align:center;">Ejecutando en Python...</div>';
+    document.getElementById('resultados').innerHTML = '<div style="color:#94a3b8;text-align:center;">Calculando rutas terrestres...</div>';
 
     fetch('/api/ejecutar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
+        body: JSON.stringify({
+            clientes: clientes.map(function(c) { return [c.lat, c.lng]; }),
+            transporte: document.getElementById('transporte').value
+        })
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
         limpiarRutas();
+        resultadoV = data.voraz;
+        resultadoB = data.backtracking;
 
-        if (algoritmo === 'voraz' || algoritmo === 'ambas') {
-            resultadoV = data.voraz;
-            dibujarRuta(resultadoV.ruta, '#f97316', 4, null,
-                'Voraz: ' + resultadoV.distancia + ' km');
-        }
-
-        if (algoritmo === 'bt' || algoritmo === 'ambas') {
-            resultadoB = data.backtracking;
-            if (resultadoB) {
-                dibujarRuta(resultadoB.ruta, '#10b981', 4, null,
-                    'Backtracking: ' + resultadoB.distancia + ' km');
-            }
-        }
-
-        if (algoritmo === 'ambas' && resultadoV && resultadoB) {
+        if (algo === 'voraz' || algo === 'ambas')
+            dibujarRuta(resultadoV.ruta, '#f97316', 4, null, 'Voraz: ' + resultadoV.distancia + ' km');
+        if (algo === 'bt' || algo === 'ambas')
+            dibujarRuta(resultadoB.ruta, '#10b981', 4, null, 'Backtracking: ' + resultadoB.distancia + ' km');
+        if (algo === 'ambas' && resultadoV && resultadoB) {
             limpiarRutas();
-            dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4',
-                'Voraz: ' + resultadoV.distancia + ' km');
-            dibujarRuta(resultadoB.ruta, '#10b981', 3, null,
-                'Backtracking: ' + resultadoB.distancia + ' km');
+            dibujarRuta(resultadoV.ruta, '#f97316', 3, '6,4', 'Voraz: ' + resultadoV.distancia + ' km');
+            dibujarRuta(resultadoB.ruta, '#10b981', 3, null, 'Backtracking: ' + resultadoB.distancia + ' km');
         }
 
-        mostrarResultados(data, algoritmo);
-        ejecutando = false;
+        mostrarResultados(data, algo);
         document.getElementById('btnVoraz').disabled = false;
         document.getElementById('btnBT').disabled = clientes.length < 2;
-        if (resultadoV && resultadoB && algoritmo !== 'ambas') {
+        if (resultadoV && resultadoB && algo !== 'ambas')
             document.getElementById('btnComparar').style.display = 'inline-block';
-        }
     })
     .catch(function(err) {
-        console.error(err);
         document.getElementById('resultados').innerHTML =
-            '<div style="color:#ef4444;text-align:center;">Error: No conecta con Python.<br>Asegurate de ejecutar: <b>python servidor.py</b></div>';
-        ejecutando = false;
+            '<div style="color:#ef4444;text-align:center;">Error: desconectado de Python.<br>Ejecuta: <b>python servidor.py</b></div>';
         document.getElementById('btnVoraz').disabled = false;
         document.getElementById('btnBT').disabled = clientes.length < 2;
     });
@@ -377,34 +265,41 @@ function ejecutarVoraz() { llamarAPI('voraz'); }
 function ejecutarBT() { llamarAPI('bt'); }
 function mostrarComparativa() { llamarAPI('ambas'); }
 
-function mostrarResultados(data, modo) {
+function mostrarResultados(data, algo) {
     var div = document.getElementById('resultados');
     var html = '';
-    var v = data.voraz;
-    var bt = data.backtracking;
+    var t = data.transporte;
 
-    if (v) {
-        html += '<div class="fila"><span>Voraz</span><span class="val val-naranja">' + v.distancia + ' km</span></div>';
-    }
-    if (bt) {
-        html += '<div class="fila"><span>Backtracking</span><span class="val val-verde">' + bt.distancia + ' km</span></div>';
-        if (v && data.mejora) {
-            html += '<div class="fila" style="border:none;padding-top:6px;"><span>Mejora</span><span class="val val-verde">' + data.mejora + '%</span></div>';
-        }
-        html += '<div class="fila" style="font-size:0.75rem;color:#94a3b8;border:none;">Ramas: ' + bt.ramas + ' de ' + bt.total + '</div>';
-        html += '<div class="poda-bar"><div style="width:' + bt.ramas / bt.total * 100 + '%"></div></div>';
-        html += '<div style="font-size:0.75rem;color:#10b981;font-weight:bold;">Poda ahorr&oacute; ' + bt.ahorro + '%</div>';
+    html += '<div style="color:#fcd34d;font-weight:600;margin-bottom:4px;">' + t.nombre + ' (' + t.velocidad + ')</div>';
+
+    if (data.voraz)
+        html += '<div class="fila"><span>Voraz</span><span class="val val-naranja">' + data.voraz.distancia + ' km</span></div>';
+    if (data.backtracking) {
+        html += '<div class="fila"><span>Backtracking</span><span class="val val-verde">' + data.backtracking.distancia + ' km</span></div>';
+        if (data.mejora)
+            html += '<div class="fila" style="border:none;"><span>Mejora</span><span class="val val-verde">' + data.mejora + '%</span></div>';
+        html += '<div class="poda-bar"><div style="width:' + (data.backtracking.ramas / data.backtracking.total * 100) + '%"></div></div>';
+        html += '<div style="font-size:0.7rem;color:#10b981;">Poda ahorro ' + data.backtracking.ahorro + '%</div>';
     }
 
-    if (!html) {
-        html = '<div style="color:#94a3b8;text-align:center;">Ejecuta un algoritmo primero</div>';
-    }
+    // Mochila
+    var m = data.mochila;
+    html += '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #334155;">';
+    html += '<div style="color:#7dd3fc;font-size:0.8rem;">Mochila: $' + m.valor_maximo + '</div>';
+    html += '<div style="font-size:0.7rem;color:#94a3b8;">Peso usado: ' + m.peso_usado + '/' + t.peso_max + 'kg &bull; Largo: ' + m.largo_usado + '/' + t.largo_max + 'cm</div>';
+    html += '<div class="mochila-grid">';
+    var sel = m.seleccionados;
+    data.paquetes.forEach(function(p) {
+        var cant = sel[p.nombre] || 0;
+        var ok = cant > 0;
+        html += '<div class="mochila-item' + (ok ? ' ok' : '') + '">' + p.nombre + (ok ? ' x' + cant : ' 0') + '</div>';
+    });
+    html += '</div></div>';
 
     div.innerHTML = html;
 }
 
-// Deshabilitar comparar al cargar
-document.getElementById('btnComparar').style.display = 'none';
+cambiarTransporte();
 </script>
 </body>
 </html>
